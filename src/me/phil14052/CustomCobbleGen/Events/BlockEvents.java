@@ -68,6 +68,7 @@ public class BlockEvents implements Listener{
 			if(toBlockMaterial.equals(Material.AIR) || mode.containsBlock(toBlockMaterial)){
 				if(isGenerating(mode, m, toBlock)){
 					Location l = toBlock.getLocation();
+					if(l.getWorld() == null) return;
 					//Checks if the block has been broken before and if it is a known gen location
 					if(!bm.isGenLocationKnown(l) && mode.isSearchingForPlayersNearby()) {
 						double searchRadius = Setting.PLAYERSEARCHRADIUS.getDouble();
@@ -115,18 +116,22 @@ public class BlockEvents implements Listener{
 							if(!toBlock.getLocation().getBlock().getType().equals(Material.COBBLESTONE)) toBlock.getLocation().getBlock().setType(Material.COBBLESTONE);
 							return;
 						}
+
+						float soundVolume = Setting.SOUND_VOLUME.getFloat();
+						float pitch = Setting.SOUND_PITCH.getFloat();
+
 						if(tier != null) {
 							Material result = tier.getRandomResult();
 							GeneratorGenerateEvent event = new GeneratorGenerateEvent(mode, tier, result, uuid, toBlock.getLocation());
 							Bukkit.getPluginManager().callEvent(event);
 							if(event.isCancelled()) return;
 							if(event.getResult() == null) {
-								plugin.error("&cUnkown material in " + event.getTierUsed().getName() + " tier.", true);
+								plugin.error("&cUnknown material in " + event.getTierUsed().getName() + " tier.", true);
 								return;
 							}
 							e.setCancelled(true);
 							event.getGenerationLocation().getBlock().setType(result); //Get a random material and replace the block
-							if(mode.hasGenSound()) l.getWorld().playSound(l, mode.getGenSound(), 2.0F, 1.0F); //Play sound if configured
+							if(mode.hasGenSound()) l.getWorld().playSound(l, mode.getGenSound(), soundVolume, pitch); //Play sound if configured
 							if(mode.hasParticleEffect()) mode.displayGenerationParticles(l);
 							return;
 						}else if(mode.hasFallBackMaterial()){
@@ -140,7 +145,7 @@ public class BlockEvents implements Listener{
 							}
 							e.setCancelled(true);
 							event.getGenerationLocation().getBlock().setType(fallback); //Get a random material and replace the block
-							if(mode.hasGenSound()) l.getWorld().playSound(l, mode.getGenSound(), 2.0F, 1.0F); //Play sound if configured
+							if(mode.hasGenSound()) l.getWorld().playSound(l, mode.getGenSound(), soundVolume, pitch); //Play sound if configured
 							if(mode.hasParticleEffect()) mode.displayGenerationParticles(l);
 							
 							return;
@@ -173,7 +178,7 @@ public class BlockEvents implements Listener{
 	public void onSignChange(SignChangeEvent e) {
 		if(signManager.areSignsDisabled()) return;
 		Location l = e.getBlock().getLocation();
-		if(isWorldDisabled(l.getWorld())) return;
+		if(l.getWorld() == null || isWorldDisabled(l.getWorld())) return;
 		Player p = e.getPlayer();
 		String[] lines = e.getLines();
 		if(!lines[0].equalsIgnoreCase("[CCG]")) return;

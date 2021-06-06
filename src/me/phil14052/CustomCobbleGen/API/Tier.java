@@ -57,9 +57,8 @@ public class Tier {
 		ItemStack icon = new ItemStack(iconMaterial);
 		ItemMeta im = icon.getItemMeta();
 		im.setDisplayName(Lang.GUI_ITEM_NAME.toString(this));
-		List<String> lore = new ArrayList<String>();
+		List<String> lore = new ArrayList<>();
 		lore.add(Lang.GUI_ITEM_LORE_TITLE.toString(this));
-		
 		im.setLore(lore);
 		icon.setItemMeta(im);
 		this.icon = icon;
